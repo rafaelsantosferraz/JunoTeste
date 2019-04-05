@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Juno Teste App</string>
+
+    <!-- GLOBAL -->
+    <string name="ok">OK</string>
+    <string name="cancel">CANCELAR</string>
+    <string name="required_field">Campo obrigatorio</string>
+
+
+    <!-- Error -->
+    <string name="error_no_internet">Você está off-line</string>
+    <string name="error_bad_connection">Problemas de conexão</string>
+    <string name="error_session_expired">Sessão expirada</string>
+    <string name="error_precon_failed">Dados incorretos</string>
+    <string name="error_unknown">Ocorreu um error</string>
+
+
+    <!-- Main -->
+    <string name="main_title">Juno</string>
+
+</resources>
