@@ -34,11 +34,12 @@ class MainRecyclerViewItemDecorator(
         }
         // every other item
         else {
-            left = middlePadding
-            right = middlePadding
             top = middlePadding
             bottom = middlePadding
         }
+
+        left = middlePadding
+        right = middlePadding
 
         outRect.set(left,top,right, bottom)
     }

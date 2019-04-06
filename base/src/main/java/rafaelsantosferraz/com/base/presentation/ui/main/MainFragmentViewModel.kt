@@ -16,12 +16,15 @@ class MainFragmentViewModel @Inject constructor (
 
     private var lastQuery = ""
     private var lastPage = 1
-    private var lastList = mutableListOf<Any>()
+    private var isLastPage = false
+    private var completeList = mutableListOf<Any>()
+
+
 
     //region GET List --------------------------------------------------------------------------------------------------
     fun getFirstPage(query: String) {
         Log.d(TAG, "[Main] getFirstPage()")
-        newState(currentState().copy(isLoading = true, firstPage = null, nextPage = null, isListEmpty = null))
+        newState(currentState().copy(isLoading = true, list = null, isListEmpty = null))
         var list: List<Any>? = null
         addJob(launch {
             try {
@@ -33,8 +36,8 @@ class MainFragmentViewModel @Inject constructor (
             }
 
             if (!list.isNullOrEmpty()) {
-                lastList = (list as List<Any>).toMutableList()
-                newState(currentState().copy(isLoading = false, firstPage = list, isListEmpty = false))
+                completeList = (list as List<Any>).toMutableList()
+                newState(currentState().copy(isLoading = false, list = list, isListEmpty = false))
             } else {
                 newState(currentState().copy(isLoading = false, isListEmpty = true))
             }
@@ -42,45 +45,88 @@ class MainFragmentViewModel @Inject constructor (
 
         lastQuery = query
         lastPage = 1
+        isLastPage = false
 
     }
     //endregion
+
 
 
     //region GET List --------------------------------------------------------------------------------------------------
     fun getNextPage() {
-        Log.d(TAG, "[Main] getNextPage()")
-        newState(currentState().copy(isLoading = true, nextPage = null, isListEmpty = null))
-        var list: List<Any>? = null
-        addJob(launch {
-            try {
-                list = withTimeoutOrNull(10000){
-                    mainInteractor.getListAsync(lastQuery, lastPage + 1).await()
+        if (!isLastPage && lastQuery.isNotBlank()) {
+            Log.d(TAG, "[Main] getNextPage()")
+            newState(currentState().copy(isLoading = true, list = null))
+            var list: List<Any>? = null
+            addJob(launch {
+                try {
+                    list = withTimeoutOrNull(10000) {
+                        mainInteractor.getListAsync(lastQuery, lastPage + 1).await()
+                    }
+                } catch (error: Throwable) {
+                    command.postValue(Command.Error(error))
                 }
-            } catch (error: Throwable){
-                command.postValue(Command.Error(error))
-            }
 
-            if (!list.isNullOrEmpty()) {
-                lastList.addAll((list as List<Any>))
-                newState(currentState().copy(isLoading = false, nextPage = list, isListEmpty = false))
-            } else {
-                newState(currentState().copy(isLoading = false, isListEmpty = true))
-            }
-        })
-        lastPage ++
-
+                if (!list.isNullOrEmpty()) {
+                    completeList.addAll((list as List<Any>))
+                    newState(currentState().copy(isLoading = false, list = completeList))
+                } else {
+                    isLastPage = true
+                    newState(currentState().copy(isLoading = false))
+                }
+            })
+            lastPage++
+        }
     }
     //endregion
+
+
 
     //region GET List --------------------------------------------------------------------------------------------------
     fun getSavedList() {
         Log.d(TAG, "[Main] getSavedList()")
-        newState(currentState().copy(savedList = null))
-        newState(currentState().copy(savedList = lastList))
+        newState(currentState().copy(isLoading = true, list = null))
+        if (completeList.isEmpty()){
+            var list: List<Any>? = null
+            addJob(launch {
+                try {
+                    list = withTimeoutOrNull(10000){
+                        mainInteractor.getSavedListAsync().await()
+                    }
+                } catch (error: Throwable){
+                    command.postValue(Command.Error(error))
+                }
+
+                if (!list.isNullOrEmpty()) {
+                    completeList = (list as List<Any>).toMutableList()
+                    newState(currentState().copy(isLoading = false, list = completeList, isListEmpty = false))
+                } else {
+                    newState(currentState().copy(isLoading = false, isListEmpty = true))
+                }
+            })
+        } else {
+            newState(currentState().copy(isLoading = false, list = completeList, isListEmpty = false))
+        }
+
     }
     //endregion
 
+
+    //region GET List --------------------------------------------------------------------------------------------------
+    fun saveList() {
+        Log.d(TAG, "[Main] saveList()")
+        var isSuccess: Boolean? = false
+        addJob(launch {
+            try {
+                isSuccess = withTimeoutOrNull(10000){
+                    mainInteractor.saveListAsync(completeList as List<Item>).await()
+                }
+            } catch (error: Throwable){
+                command.postValue(Command.Error(error))
+            }
+        })
+    }
+    //endregion
 
 
 
@@ -92,9 +138,7 @@ class MainFragmentViewModel @Inject constructor (
     data class State(
         val isLoading: Boolean? = null,
         val isListEmpty: Boolean? = null,
-        val savedList: List<Any>? = null,
-        val firstPage: List<Any>? = null,
-        val nextPage: List<Any>? = null
+        val list: List<Any>? = null
     )
 
     sealed class Command {

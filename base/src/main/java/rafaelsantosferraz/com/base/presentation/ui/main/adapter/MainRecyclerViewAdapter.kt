@@ -19,9 +19,6 @@ class MainRecyclerViewAdapter : ListAdapter<Any, MainRecyclerViewAdapter.BaseVie
 
     private var onItemClickListener: OnItemClickListener? = null
 
-    var completeList: List<Any> = listOf()
-
-
     interface OnItemClickListener{
         fun onItemClick(item: Any, position: Int, view: View)
     }

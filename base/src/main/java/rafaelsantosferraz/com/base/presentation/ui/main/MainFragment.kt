@@ -38,7 +38,6 @@ class MainFragment: BaseViewModelFragment<MainFragmentViewModel>(), Injectable  
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupToolbar()
         setupRecyclerView()
         setupListener()
@@ -48,13 +47,17 @@ class MainFragment: BaseViewModelFragment<MainFragmentViewModel>(), Injectable  
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_main, menu)
-
         setupSearchView(menu)
     }
 
     override fun onResume() {
         super.onResume()
         viewModel.getSavedList()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.saveList()
     }
 
     override fun onDestroyView() {
@@ -68,7 +71,7 @@ class MainFragment: BaseViewModelFragment<MainFragmentViewModel>(), Injectable  
 
 
 
-    //region Private ---------------------------------------------------------------------------------------------------
+    //region Setup -----------------------------------------------------------------------------------------------------
     private fun setupToolbar(){
         setHasOptionsMenu(true)
         (activity as AppCompatActivity).supportActionBar?.apply {
@@ -108,9 +111,6 @@ class MainFragment: BaseViewModelFragment<MainFragmentViewModel>(), Injectable  
                 super.onScrolled(recyclerView, dx, dy)
                 if (dy > 0) {
                     if (!recyclerView.canScrollVertically(1)) {
-//                        if (!isLastPage && !isLoading) {
-//                            viewModel.getNextPage()
-//                        }
                         viewModel.getNextPage()
                     }
                 }
@@ -152,21 +152,9 @@ class MainFragment: BaseViewModelFragment<MainFragmentViewModel>(), Injectable  
                 }
             }
 
-            part("firstPage", state.firstPage) {
+            part("list", state.list) {
                 if (it != null) {
-                    handleFirstPage(it)
-                }
-            }
-
-            part("nextPage", state.nextPage) {
-                if (it != null) {
-                    handleNextPage(it)
-                }
-            }
-
-            part("savedList", state.savedList) {
-                if (it != null) {
-                    handleSavedList(it)
+                    handleList(it)
                 }
             }
         }
@@ -182,23 +170,8 @@ class MainFragment: BaseViewModelFragment<MainFragmentViewModel>(), Injectable  
         }
     }
 
-    private fun handleFirstPage(list: List<Any>) {
-        Log.d(tag, "[Main] handleFirstPage($list)")
-        mainRecyclerViewAdapter.completeList = list
-        mainRecyclerViewAdapter.submitList(list)
-    }
-
-    private fun handleNextPage(list: List<Any>) {
-        Log.d(tag, "[Main] handleNextPage($list)")
-        val newList = mainRecyclerViewAdapter.completeList.toMutableList()
-        newList.addAll(list)
-        mainRecyclerViewAdapter.completeList = newList
-        mainRecyclerViewAdapter.submitList(newList)
-    }
-
-    private fun handleSavedList(list: List<Any>) {
-        Log.d(tag, "[Main] handleSavedList($list)")
-        mainRecyclerViewAdapter.completeList = list
+    private fun handleList(list: List<Any>) {
+        Log.d(tag, "[Main] handleList($list)")
         mainRecyclerViewAdapter.submitList(list)
     }
 

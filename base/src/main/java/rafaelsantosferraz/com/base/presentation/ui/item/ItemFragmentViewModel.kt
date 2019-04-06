@@ -4,85 +4,49 @@ import android.util.Log
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import rafaelsantosferraz.com.base.domain.Item
+import rafaelsantosferraz.com.base.interactors.item.ItemInteractor
 import rafaelsantosferraz.com.base.interactors.main.MainInteractor
 import rafaelsantosferraz.com.base.presentation.ui.base.BaseViewModel
 import javax.inject.Inject
 
 class ItemFragmentViewModel @Inject constructor (
-    private val mainInteractor: MainInteractor
+    private val itemInteractor: ItemInteractor
 ):  BaseViewModel<ItemFragmentViewModel.State, ItemFragmentViewModel.Command>() {
 
-    private val TAG = "MainFragmentViewModel"
+    private val TAG = "ItemFragmentViewModel"
 
-    private var lastQuery = ""
-    private var lastPage = 1
-    private var lastList = mutableListOf<Any>()
+
+    private var lastReadme = ""
+    private var lastOwner = ""
 
     //region GET List --------------------------------------------------------------------------------------------------
-    fun getFirstPage(query: String) {
-        Log.d(TAG, "[Main] getFirstPage()")
-        newState(currentState().copy(isLoading = true, firstPage = null, nextPage = null, isListEmpty = null))
-        var list: List<Any>? = null
-        addJob(launch {
-            try {
-                list = withTimeoutOrNull(10000){
-                    mainInteractor.getListAsync(query, 1).await()
+    fun getReadme(ownerLogin: String, repoName: String) {
+        Log.d(TAG, "[Item] getReadme()")
+        newState(currentState().copy(isLoading = true, readme = null, isListEmpty = null))
+        if (lastReadme.isBlank() || lastOwner != ownerLogin) {
+            lastOwner = ownerLogin
+            var readme: String? = null
+            addJob(launch {
+                try {
+                    readme = withTimeoutOrNull(10000) {
+                        itemInteractor.getReadmeAsync(ownerLogin, repoName).await()
+                    }
+                } catch (error: Throwable) {
+                    command.postValue(Command.Error(error))
                 }
-            } catch (error: Throwable){
-                command.postValue(Command.Error(error))
-            }
 
-            if (!list.isNullOrEmpty()) {
-                lastList = (list as List<Any>).toMutableList()
-                newState(currentState().copy(isLoading = false, firstPage = list, isListEmpty = false))
-            } else {
-                newState(currentState().copy(isLoading = false, isListEmpty = true))
-            }
-        })
-
-        lastQuery = query
-        lastPage = 1
-
-    }
-    //endregion
-
-
-    //region GET List --------------------------------------------------------------------------------------------------
-    fun getNextPage() {
-        Log.d(TAG, "[Main] getNextPage()")
-        newState(currentState().copy(isLoading = true, nextPage = null, isListEmpty = null))
-        var list: List<Any>? = null
-        addJob(launch {
-            try {
-                list = withTimeoutOrNull(10000){
-                    mainInteractor.getListAsync(lastQuery, lastPage + 1).await()
+                if (!readme.isNullOrBlank()) {
+                    lastReadme = readme as String
+                    newState(currentState().copy(isLoading = false, readme = lastReadme, isListEmpty = false))
+                } else {
+                    newState(currentState().copy(isLoading = false, isListEmpty = true))
                 }
-            } catch (error: Throwable){
-                command.postValue(Command.Error(error))
-            }
-
-            if (!list.isNullOrEmpty()) {
-                lastList.addAll((list as List<Any>))
-                newState(currentState().copy(isLoading = false, nextPage = list, isListEmpty = false))
-            } else {
-                newState(currentState().copy(isLoading = false, isListEmpty = true))
-            }
-        })
-        lastPage ++
-
+            })
+        } else {
+            newState(currentState().copy(isLoading = false, readme = lastReadme, isListEmpty = false))
+        }
     }
     //endregion
-
-    //region GET List --------------------------------------------------------------------------------------------------
-    fun getSavedList() {
-        Log.d(TAG, "[Main] getSavedList()")
-        newState(currentState().copy(savedList = null))
-        newState(currentState().copy(savedList = lastList))
-    }
-    //endregion
-
-
-
 
 
 
@@ -92,9 +56,7 @@ class ItemFragmentViewModel @Inject constructor (
     data class State(
         val isLoading: Boolean? = null,
         val isListEmpty: Boolean? = null,
-        val savedList: List<Any>? = null,
-        val firstPage: List<Any>? = null,
-        val nextPage: List<Any>? = null
+        val readme:String? = null
     )
 
     sealed class Command {

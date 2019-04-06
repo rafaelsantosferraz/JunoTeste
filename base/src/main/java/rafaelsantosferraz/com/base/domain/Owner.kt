@@ -1,6 +1,8 @@
 package rafaelsantosferraz.com.base.domain
 
 import android.os.Parcelable
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import kotlinx.android.parcel.Parcelize
@@ -13,10 +15,10 @@ data class Owner (
     var login: String? = null,
     @SerializedName("id")
     @Expose
-    var id: Long? = null,
+    var ownerId: Long? = null,
     @SerializedName("node_id")
     @Expose
-    var nodeId: String? = null,
+    var ownerNodeId: String? = null,
     @SerializedName("avatar_url")
     @Expose
     var avatarUrl: String? = null,
@@ -25,10 +27,10 @@ data class Owner (
     var gravatarId: String? = null,
     @SerializedName("url")
     @Expose
-    var url: String? = null,
+    var ownerUrl: String? = null,
     @SerializedName("html_url")
     @Expose
-    var htmlUrl: String? = null,
+    var ownerHtmlUrl: String? = null,
     @SerializedName("followers_url")
     @Expose
     var followersUrl: String? = null,
@@ -52,7 +54,7 @@ data class Owner (
     var reposUrl: String? = null,
     @SerializedName("events_url")
     @Expose
-    var eventsUrl: String? = null,
+    var ownerEventsUrl: String? = null,
     @SerializedName("received_events_url")
     @Expose
     var receivedEventsUrl: String? = null,

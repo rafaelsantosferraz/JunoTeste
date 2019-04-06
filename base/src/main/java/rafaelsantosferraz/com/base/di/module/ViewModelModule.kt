@@ -7,6 +7,7 @@ import dagger.Module
 import dagger.multibindings.IntoMap
 import rafaelsantosferraz.com.base.ViewModelFactory
 import rafaelsantosferraz.com.base.di.ViewModelKey
+import rafaelsantosferraz.com.base.presentation.ui.item.ItemFragmentViewModel
 import rafaelsantosferraz.com.base.presentation.ui.main.MainFragmentViewModel
 import javax.inject.Singleton
 
@@ -23,5 +24,13 @@ abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(MainFragmentViewModel::class)
     abstract fun bindMainFragmentViewModel(viewModel: MainFragmentViewModel): ViewModel
+
+
+    //Item Fragment
+    @Binds
+    @Singleton
+    @IntoMap
+    @ViewModelKey(ItemFragmentViewModel::class)
+    abstract fun bindItemFragmentViewModel(viewModel: ItemFragmentViewModel): ViewModel
 
 }

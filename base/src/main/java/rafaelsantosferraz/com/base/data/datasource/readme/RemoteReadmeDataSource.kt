@@ -5,11 +5,11 @@ import rafaelsantosferraz.com.base.domain.Item
 import rafaelsantosferraz.com.base.presentation.network.GithubApi
 import javax.inject.Inject
 
-class RemoteItemDataSource @Inject constructor(
+class RemoteReadmeDataSource @Inject constructor(
         private val githubApi: GithubApi
-): ItemDataSource {
+): ReadmeDataSource {
 
-    override suspend fun getItems(query: String, page: Int): List<Item> {
-        return githubApi.getRepositories(query, page).blockingGet().items ?: listOf()
+    override suspend fun getReadme(ownerLogin: String, repoName: String): String {
+        return githubApi.getReadme(ownerLogin, repoName).blockingGet().content ?: ""
     }
 }

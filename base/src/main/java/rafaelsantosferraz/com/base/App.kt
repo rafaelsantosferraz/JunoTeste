@@ -23,6 +23,7 @@ class App : MultiDexApplication(), HasActivityInjector, HasServiceInjector {
         super.onCreate()
 
         AppInjector.init(this)
+
 //        if (LeakCanary.isInAnalyzerProcess(this)) {
 //            return
 //        }

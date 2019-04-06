@@ -1,15 +1,20 @@
 package rafaelsantosferraz.com.base.domain
 
 import android.os.Parcelable
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
+@Entity
 data class Item (
 
     @SerializedName("id")
     @Expose
+    @PrimaryKey
     var id: Long? = null,
     @SerializedName("node_id")
     @Expose
@@ -22,6 +27,7 @@ data class Item (
     var fullName: String? = null,
     @SerializedName("owner")
     @Expose
+    @Embedded
     var owner: Owner? = null,
     @SerializedName("private")
     @Expose
