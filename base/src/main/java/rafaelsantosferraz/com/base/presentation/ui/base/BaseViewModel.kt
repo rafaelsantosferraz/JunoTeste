@@ -36,7 +36,7 @@ abstract class BaseViewModel<S, C> : ViewModel(), CoroutineScope {
         }
     }
 
-    protected fun newState(state: S) {
+    fun newState(state: S) {
         this.state.value = state
     }
 

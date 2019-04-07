@@ -17,7 +17,7 @@ class MainFragmentViewModel @Inject constructor (
     private var lastQuery = ""
     private var lastPage = 1
     private var isLastPage = false
-    private var completeList = mutableListOf<Any>()
+    var completeList = mutableListOf<Any>()
 
 
 
