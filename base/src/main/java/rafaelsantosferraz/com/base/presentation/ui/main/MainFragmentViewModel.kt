@@ -1,6 +1,8 @@
 package rafaelsantosferraz.com.base.presentation.ui.main
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.paging.PagedList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import rafaelsantosferraz.com.base.domain.Item
@@ -14,71 +16,28 @@ class MainFragmentViewModel @Inject constructor (
 
     private val TAG = "MainFragmentViewModel"
 
-    var lastQuery = ""
-    var lastPage = 1
-    var isLastPage = false
+
     var completeList = mutableListOf<Any>()
 
-
-
     //region GET List --------------------------------------------------------------------------------------------------
-    fun getFirstPage(query: String) {
+    fun getLivePagedList(query: String) {
         Log.d(TAG, "[Main] getFirstPage()")
-        newState(currentState().copy(isLoading = true, list = null, isListEmpty = null))
-        var list: List<Any>? = null
+        newState(currentState().copy(isLoading = true, isListEmpty = null))
+        var pagedList: PagedList<Any>? = null
         addJob(launch {
             try {
-                list = withTimeoutOrNull(10000){
-                    mainInteractor.getListAsync(query, 1).await()
+                pagedList = withTimeoutOrNull(10000){
+                    mainInteractor.getPagedListAsync(query).await()
                 }
             } catch (error: Throwable){
                 command.postValue(Command.Error(error))
             }
-
-            if (!list.isNullOrEmpty()) {
-                completeList = (list as List<Any>).toMutableList()
-                newState(currentState().copy(isLoading = false, list = list, isListEmpty = false))
-            } else {
-                newState(currentState().copy(isLoading = false, isListEmpty = true))
-            }
+            command.value = Command.GetPagedList(pagedList)
+            newState(currentState().copy(isLoading = false, isListEmpty = false))
         })
-
-        lastQuery = query
-        lastPage = 1
-        isLastPage = false
-
     }
     //endregion
 
-
-
-    //region GET List --------------------------------------------------------------------------------------------------
-    fun getNextPage() {
-        if (!isLastPage && lastQuery.isNotBlank()) {
-            Log.d(TAG, "[Main] getNextPage()")
-            newState(currentState().copy(isLoading = true, list = null))
-            var list: List<Any>? = null
-            addJob(launch {
-                try {
-                    list = withTimeoutOrNull(10000) {
-                        mainInteractor.getListAsync(lastQuery, lastPage + 1).await()
-                    }
-                } catch (error: Throwable) {
-                    command.postValue(Command.Error(error))
-                }
-
-                if (!list.isNullOrEmpty()) {
-                    completeList.addAll((list as List<Any>))
-                    newState(currentState().copy(isLoading = false, list = completeList))
-                } else {
-                    isLastPage = true
-                    newState(currentState().copy(isLoading = false))
-                }
-            })
-            lastPage++
-        }
-    }
-    //endregion
 
 
 
@@ -143,5 +102,6 @@ class MainFragmentViewModel @Inject constructor (
 
     sealed class Command {
         class Error(val throwable: Throwable) : Command()
+        class GetPagedList(val pagedList: PagedList<Any>?) : Command()
     }
 }

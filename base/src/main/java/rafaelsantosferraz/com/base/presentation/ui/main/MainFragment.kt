@@ -8,8 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.main_fragment.*
 import rafaelsantosferraz.com.base.R
 import rafaelsantosferraz.com.base.di.Injectable
@@ -52,12 +52,12 @@ class MainFragment: BaseViewModelFragment<MainFragmentViewModel>(), Injectable  
 
     override fun onResume() {
         super.onResume()
-        viewModel.getSavedList()
+        //viewModel.getSavedList()
     }
 
     override fun onPause() {
         super.onPause()
-        viewModel.saveList()
+        //viewModel.saveList()
     }
 
     override fun onDestroyView() {
@@ -85,7 +85,7 @@ class MainFragment: BaseViewModelFragment<MainFragmentViewModel>(), Injectable  
         val searchView = menu.findItem(R.id.action_main_search)?.actionView as SearchView
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
             override fun onQueryTextSubmit(query: String?): Boolean {
-                query?.let {  viewModel.getFirstPage(query) }
+                query?.let {  viewModel.getLivePagedList(query) }
                 return true
             }
 
@@ -106,16 +106,16 @@ class MainFragment: BaseViewModelFragment<MainFragmentViewModel>(), Injectable  
             findNavController().navigate(MainFragmentDirections.actionMainFragmentToItemFragment(item as Item))
         }
 
-        main_fragment_rv.addOnScrollListener(object : RecyclerView.OnScrollListener(){
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (dy > 0) {
-                    if (!recyclerView.canScrollVertically(1)) {
-                        viewModel.getNextPage()
-                    }
-                }
-            }
-        })
+//        main_fragment_rv.addOnScrollListener(object : RecyclerView.OnScrollListener(){
+//            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+//                super.onScrolled(recyclerView, dx, dy)
+//                if (dy > 0) {
+//                    if (!recyclerView.canScrollVertically(1)) {
+//                        viewModel.getNextPage()
+//                    }
+//                }
+//            }
+//        })
     }
 
     private fun setupObservers() {
@@ -170,16 +170,16 @@ class MainFragment: BaseViewModelFragment<MainFragmentViewModel>(), Injectable  
         }
     }
 
-    private fun handleList(list: List<Any>) {
-        Log.d(tag, "[Main] handleList($list)")
-        mainRecyclerViewAdapter.submitList(list)
+    private fun handleList(pagedList: List<Any>) {
+        Log.d(tag, "[Main] handleList($pagedList)")
+        //mainRecyclerViewAdapter.submitList(pagedList)
     }
 
     private fun handleEmpty(isEmpty: Boolean) {
         Log.d(tag, "[Main] handleEmpty($isEmpty)")
         if (isEmpty) {
             main_fragment_empty_tv.visibility = View.VISIBLE
-            mainRecyclerViewAdapter.submitList(listOf())
+            //mainRecyclerViewAdapter.submitList()
         } else {
             main_fragment_empty_tv.visibility = View.GONE
         }
@@ -194,7 +194,14 @@ class MainFragment: BaseViewModelFragment<MainFragmentViewModel>(), Injectable  
         command.let {
             when (command) {
                 is MainFragmentViewModel.Command.Error -> handleError(command.throwable)
+                is MainFragmentViewModel.Command.GetPagedList -> handleGetLivePagedList(command.pagedList)
             }
+        }
+    }
+
+    private fun handleGetLivePagedList(pagedList:PagedList<Any>?){
+        pagedList?.let {
+            mainRecyclerViewAdapter.submitList(pagedList)
         }
     }
     // endregion

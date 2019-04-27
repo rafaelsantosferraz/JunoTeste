@@ -66,8 +66,13 @@ dependencies {
     api 'android.arch.navigation:navigation-ui-ktx:1.0.0'
 
 
+    // Paging Component
+    api "androidx.paging:paging-runtime:2.1.0"
+    api "androidx.paging:paging-rxjava2:2.1.0"
+
+
     // Room Component
-    implementation 'android.arch.persistence.room:runtime:1.1.1'
+    api 'android.arch.persistence.room:runtime:1.1.1'
     kapt 'android.arch.persistence.room:compiler:1.1.1'
 
 
@@ -80,7 +85,7 @@ dependencies {
 
 
     // Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.1'
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
 
@@ -114,6 +119,6 @@ dependencies {
 
 
     // MarkDown
-    implementation 'com.github.tiagohm.MarkdownView:library:0.19.0'
+    api 'com.github.tiagohm.MarkdownView:library:0.19.0'
 
 }

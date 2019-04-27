@@ -4,6 +4,7 @@ import io.reactivex.Single
 import rafaelsantosferraz.com.base.domain.GetReadmeResponse
 import rafaelsantosferraz.com.base.domain.GetRepositoriesResponse
 import retrofit2.http.GET
+import retrofit2.http.Headers
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -18,10 +19,13 @@ interface GithubApi {
 
 
     // REPOSITORIES ----------------------------------------------------------------------------------------------------
+    @Headers("'User-Agent': 'request'")
     @GET("search/repositories")
+
+
     fun getRepositories(
-        @Query("q") termo: String,
-        @Query("page") page: Int,
+        @Query("q") termo: String = "",
+        @Query("page") page: Int = 0,
         @Query("per_page") per_page: Int = 20
     ): Single<GetRepositoriesResponse>
 
